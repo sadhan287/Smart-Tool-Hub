@@ -1,234 +1,197 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Smart Tool Hub</title>
-
 <style>
 *{box-sizing:border-box}
-
 body{
- margin:0;
- font-family:Arial,sans-serif;
- background:#f1f5ff;
- color:#172554;
+ margin:0;font-family:Arial,sans-serif;
+ background:#f0f5ff;color:#172554;
 }
-
 header{
- background:linear-gradient(135deg,#0755d9,#173b91);
- color:white;
- padding:22px 15px;
- text-align:center;
+ background:linear-gradient(120deg,#0755d9,#168bfa);
+ color:white;text-align:center;padding:30px 15px;
 }
-
-.logo{
- font-size:32px;
- font-weight:bold;
-}
-
-header p{margin-bottom:0}
-
-.container{
- max-width:650px;
- margin:25px auto;
- padding:15px;
-}
-
+header h1{margin:0;font-size:30px}
+header p{margin:10px 0 0}
+.container{max-width:850px;margin:25px auto;padding:12px}
 .card{
- background:white;
- padding:22px;
- border-radius:16px;
- box-shadow:0 4px 18px #00000012;
+ background:white;padding:22px;border-radius:16px;
+ box-shadow:0 4px 18px #00000012;margin-bottom:20px;
 }
-
-h2{text-align:center;color:#1246a0}
-
-textarea{
- width:100%;
- height:180px;
- padding:14px;
- border:2px solid #cbd5e1;
- border-radius:10px;
- font-size:16px;
- resize:vertical;
+h2{color:#0755d9;margin-top:0}
+label{display:block;font-weight:bold;margin:12px 0 7px}
+select,textarea{
+ width:100%;padding:13px;border:1px solid #cbd5e1;
+ border-radius:9px;font-size:16px;background:white;
 }
-
-select{
- width:100%;
- padding:12px;
- margin:12px 0;
- border:1px solid #cbd5e1;
- border-radius:8px;
- font-size:15px;
-}
-
-.buttons{
- display:grid;
- grid-template-columns:1fr 1fr;
- gap:10px;
- margin-top:15px;
-}
-
+textarea{min-height:155px;resize:vertical}
+.buttons{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:15px}
 button{
- border:0;
- border-radius:9px;
- padding:14px 8px;
- background:#1455d9;
- color:white;
- font-size:15px;
- font-weight:bold;
- cursor:pointer;
+ border:0;border-radius:9px;padding:13px 9px;
+ background:#0866df;color:white;font-size:15px;
+ font-weight:bold;cursor:pointer;
 }
-
-button:hover{background:#083b9e}
-
+button:hover{background:#0649a8}
 .secondary{background:#475569}
-
-#result{
- background:#eff6ff;
- padding:15px;
- margin-top:18px;
- border-radius:10px;
- min-height:60px;
- white-space:pre-wrap;
- overflow-wrap:anywhere;
-}
-
-footer{
- text-align:center;
- padding:25px;
- color:#64748b;
+#result{background:#f8fafc;min-height:110px;white-space:pre-wrap;overflow-wrap:anywhere}
+.status{font-size:13px;color:#475569;margin-top:12px}
+footer{text-align:center;padding:25px;color:#64748b}
+@media(max-width:450px){
+ header h1{font-size:25px}
+ .card{padding:16px}
+ .buttons{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
-
 <body>
 
 <header>
- <div class="logo">🚀 Smart Tool Hub</div>
- <p id="tagline">Your Free Online Smart Tools</p>
+<h1>Smart Tool Hub</h1>
+<p>Your Free Online Smart Tools</p>
+<p>आपका अपना फ्री स्मार्ट टूल प्लेटफॉर्म</p>
 </header>
 
-<div class="container">
+<main class="container">
 
 <div class="card">
+<h2>Smart Text Tools</h2>
 
-<h2 id="heading">Smart Text Tool</h2>
-
-<select id="language" onchange="changeLanguage()">
- <option value="en">English</option>
- <option value="hi">हिन्दी</option>
+<label>Select Language / भाषा चुनें</label>
+<select id="language">
+<option value="English">English</option>
+<option value="Hindi">हिंदी</option>
 </select>
 
+<label>Enter Your Text / अपना टेक्स्ट लिखें</label>
 <textarea id="input" placeholder="Enter your text here..."></textarea>
 
-<p id="count">Characters: 0</p>
-
 <div class="buttons">
-
-<button onclick="summarize()" id="sum">
- Summarize
-</button>
-
-<button onclick="improve()" id="imp">
- Improve Writing
-</button>
-
-<button onclick="translateText()" id="trans">
- Translate
-</button>
-
-<button onclick="copyResult()" id="copy">
- Copy Text
-</button>
-
+<button onclick="summarize()">Summarize</button>
+<button onclick="improve()">Improve Writing</button>
+</div>
 </div>
 
+<div class="card">
+<h2>Language Translator</h2>
+
+<label>Translate From</label>
+<select id="from">
+<option value="en">English</option>
+<option value="hi">Hindi</option>
+</select>
+
+<label>Translate To</label>
+<select id="to">
+<option value="hi">Hindi</option>
+<option value="en">English</option>
+</select>
+
+<button style="width:100%;margin-top:15px" onclick="translateText()">Translate Now</button>
+</div>
+
+<div class="card">
+<h2>Result / परिणाम</h2>
 <div id="result">Your result will appear here...</div>
 
+<div class="buttons">
+<button onclick="copyResult()">Copy Result</button>
+<button class="secondary" onclick="clearAll()">Clear All</button>
+</div>
+<p class="status" id="status">Ready to use!</p>
 </div>
 
-</div>
+</main>
 
 <footer>
-© 2026 Smart Tool Hub | Free Online Tools
+<p>© 2026 Smart Tool Hub</p>
+<p>Free Online Tools | Hindi & English</p>
 </footer>
 
 <script>
-
-const input=document.getElementById("input");
-const result=document.getElementById("result");
-
-input.addEventListener("input",()=>{
- document.getElementById("count").textContent=
- "Characters: "+input.value.length;
-});
+function getText(){
+return document.getElementById("input").value.trim();
+}
+function show(text){
+document.getElementById("result").textContent=text;
+}
+function message(text){
+document.getElementById("status").textContent=text;
+}
 
 function summarize(){
- let text=input.value.trim();
- if(!text){alert("Please enter some text");return;}
-
- let sentences=text.match(/[^.!?]+[.!?]+|[^.!?]+$/g)||[text];
- result.textContent=sentences.slice(0,3).join(" ").trim();
+let text=getText();
+if(!text){message("Please enter some text.");return;}
+let sentences=text.match(/[^.!?।]+[.!?।]?/g)||[text];
+let words=text.split(/\s+/).length;
+let count=Math.max(1,Math.ceil(sentences.length/2));
+let result=sentences.slice(0,count).join(" ").trim();
+show(result);
+message("Summary prepared. Original words: "+words);
 }
 
 function improve(){
- let text=input.value.trim();
- if(!text){alert("Please enter some text");return;}
-
- text=text.replace(/\s+/g," ");
- text=text.charAt(0).toUpperCase()+text.slice(1);
-
- result.textContent=text;
+let text=getText();
+if(!text){message("Please enter some text.");return;}
+let result=text.replace(/\s+/g," ").trim();
+result=result.replace(/(^\s*\p{L}|[.!?।]\s*\p{L})/gu,
+m=>m.toUpperCase());
+if(result && !/[.!?।]$/.test(result))result+=".";
+show(result);
+message("Basic text corrections completed.");
 }
 
-function translateText(){
- let text=input.value.trim();
- if(!text){alert("Please enter some text");return;}
-
- let url="https://translate.google.com/?sl=auto&tl=hi&text="
- +encodeURIComponent(text)+"&op=translate";
-
- window.open(url,"_blank");
+async function translateText(){
+let text=getText();
+let from=document.getElementById("from").value;
+let to=document.getElementById("to").value;
+if(!text){message("Please enter text first.");return;}
+if(from===to){message("Please select two different languages.");return;}
+message("Translating... Please wait.");
+try{
+let url="https://api.mymemory.translated.net/get?q="
++encodeURIComponent(text)
++"&langpair="+from+"|"+to;
+let response=await fetch(url);
+if(!response.ok)throw new Error("Network error");
+let data=await response.json();
+if(data.responseStatus!==200)throw new Error("Translation unavailable");
+show(data.responseData.translatedText);
+message("Translation completed.");
+}catch(error){
+message("Translation failed. Please check internet or try again later.");
+}
 }
 
 function copyResult(){
- let text=result.textContent;
- if(!text){return;}
- navigator.clipboard.writeText(text)
- .then(()=>alert("Copied successfully!"))
- .catch(()=>alert("Please select and copy the text."));
+let text=document.getElementById("result").textContent;
+if(!text || text==="Your result will appear here..."){
+message("Nothing to copy.");return;
+}
+if(navigator.clipboard && window.isSecureContext){
+navigator.clipboard.writeText(text)
+.then(()=>message("Copied successfully!"))
+.catch(()=>message("Copy unavailable."));
+}else{
+let area=document.createElement("textarea");
+area.value=text;
+document.body.appendChild(area);
+area.select();
+try{
+document.execCommand("copy");
+message("Copied successfully!");
+}catch(e){message("Please copy manually.");}
+area.remove();
+}
 }
 
-function changeLanguage(){
- let lang=document.getElementById("language").value;
-
- if(lang==="hi"){
-  document.getElementById("tagline").textContent=
-  "आपके लिए मुफ्त ऑनलाइन स्मार्ट टूल्स";
-  document.getElementById("heading").textContent="स्मार्ट टेक्स्ट टूल";
-  document.getElementById("sum").textContent="सारांश बनाएं";
-  document.getElementById("imp").textContent="लेखन सुधारें";
-  document.getElementById("trans").textContent="अनुवाद करें";
-  document.getElementById("copy").textContent="कॉपी करें";
-  input.placeholder="यहाँ अपना टेक्स्ट लिखें...";
-  result.textContent="आपका परिणाम यहाँ दिखाई देगा...";
- }else{
-  document.getElementById("tagline").textContent=
-  "Your Free Online Smart Tools";
-  document.getElementById("heading").textContent="Smart Text Tool";
-  document.getElementById("sum").textContent="Summarize";
-  document.getElementById("imp").textContent="Improve Writing";
-  document.getElementById("trans").textContent="Translate";
-  document.getElementById("copy").textContent="Copy Text";
-  input.placeholder="Enter your text here...";
-  result.textContent="Your result will appear here...";
- }
+function clearAll(){
+document.getElementById("input").value="";
+show("Your result will appear here...");
+message("All text cleared.");
 }
-
 </script>
-
 </body>
 </html>
