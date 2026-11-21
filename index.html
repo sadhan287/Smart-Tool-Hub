@@ -1,44 +1,91 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Smart Tool Hub</title>
+
 <style>
 *{box-sizing:border-box}
 body{
- margin:0;font-family:Arial,sans-serif;
- background:#f0f5ff;color:#172554;
+ margin:0;
+ font-family:Arial,sans-serif;
+ background:#f0f5ff;
+ color:#172554;
 }
 header{
  background:linear-gradient(120deg,#0755d9,#168bfa);
- color:white;text-align:center;padding:30px 15px;
+ color:white;
+ text-align:center;
+ padding:30px 15px;
 }
 header h1{margin:0;font-size:30px}
 header p{margin:10px 0 0}
-.container{max-width:850px;margin:25px auto;padding:12px}
+.container{
+ max-width:850px;
+ margin:25px auto;
+ padding:12px;
+}
 .card{
- background:white;padding:22px;border-radius:16px;
- box-shadow:0 4px 18px #00000012;margin-bottom:20px;
+ background:white;
+ padding:22px;
+ border-radius:16px;
+ box-shadow:0 4px 18px #00000012;
+ margin-bottom:20px;
 }
 h2{color:#0755d9;margin-top:0}
-label{display:block;font-weight:bold;margin:12px 0 7px}
+label{
+ display:block;
+ font-weight:bold;
+ margin:12px 0 7px;
+}
 select,textarea{
- width:100%;padding:13px;border:1px solid #cbd5e1;
- border-radius:9px;font-size:16px;background:white;
+ width:100%;
+ padding:13px;
+ border:1px solid #cbd5e1;
+ border-radius:9px;
+ font-size:16px;
+ background:white;
 }
 textarea{min-height:155px;resize:vertical}
-.buttons{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:15px}
+.buttons{
+ display:grid;
+ grid-template-columns:repeat(2,1fr);
+ gap:10px;
+ margin-top:15px;
+}
 button{
- border:0;border-radius:9px;padding:13px 9px;
- background:#0866df;color:white;font-size:15px;
- font-weight:bold;cursor:pointer;
+ border:0;
+ border-radius:9px;
+ padding:13px 9px;
+ background:#0866df;
+ color:white;
+ font-size:15px;
+ font-weight:bold;
+ cursor:pointer;
 }
 button:hover{background:#0649a8}
 .secondary{background:#475569}
-#result{background:#f8fafc;min-height:110px;white-space:pre-wrap;overflow-wrap:anywhere}
-.status{font-size:13px;color:#475569;margin-top:12px}
-footer{text-align:center;padding:25px;color:#64748b}
+#result{
+ background:#f8fafc;
+ min-height:110px;
+ white-space:pre-wrap;
+ overflow-wrap:anywhere;
+ padding:14px;
+ border-radius:9px;
+ border:1px solid #e2e8f0;
+}
+.status{
+ font-size:13px;
+ color:#475569;
+ margin-top:12px;
+}
+footer{
+ text-align:center;
+ padding:25px;
+ color:#64748b;
+}
 @media(max-width:450px){
  header h1{font-size:25px}
  .card{padding:16px}
@@ -46,152 +93,188 @@ footer{text-align:center;padding:25px;color:#64748b}
 }
 </style>
 </head>
+
 <body>
 
 <header>
 <h1>Smart Tool Hub</h1>
-<p>Your Free Online Smart Tools</p>
-<p>आपका अपना फ्री स्मार्ट टूल प्लेटफॉर्म</p>
+<p>Your Free Online Smart Text Tools</p>
 </header>
 
-<main class="container">
+<div class="container">
 
 <div class="card">
 <h2>Smart Text Tools</h2>
 
-<label>Select Language / भाषा चुनें</label>
+<label>Select Language</label>
 <select id="language">
-<option value="English">English</option>
-<option value="Hindi">हिंदी</option>
+<option value="en">English</option>
+<option value="hi">हिंदी</option>
 </select>
 
-<label>Enter Your Text / अपना टेक्स्ट लिखें</label>
-<textarea id="input" placeholder="Enter your text here..."></textarea>
+<label>Enter Your Text</label>
+<textarea id="inputText" placeholder="Enter or paste your text here..."></textarea>
 
 <div class="buttons">
 <button onclick="summarize()">Summarize</button>
+<button onclick="translateText()">Translate</button>
 <button onclick="improve()">Improve Writing</button>
-</div>
-</div>
-
-<div class="card">
-<h2>Language Translator</h2>
-
-<label>Translate From</label>
-<select id="from">
-<option value="en">English</option>
-<option value="hi">Hindi</option>
-</select>
-
-<label>Translate To</label>
-<select id="to">
-<option value="hi">Hindi</option>
-<option value="en">English</option>
-</select>
-
-<button style="width:100%;margin-top:15px" onclick="translateText()">Translate Now</button>
+<button class="secondary" onclick="clearText()">Clear</button>
 </div>
 
-<div class="card">
-<h2>Result / परिणाम</h2>
+<label>Your Result</label>
 <div id="result">Your result will appear here...</div>
 
 <div class="buttons">
 <button onclick="copyResult()">Copy Result</button>
-<button class="secondary" onclick="clearAll()">Clear All</button>
+<button class="secondary" onclick="clearResult()">Clear Result</button>
 </div>
+
 <p class="status" id="status">Ready to use!</p>
 </div>
 
-</main>
+<div class="card">
+<h2>About Smart Tool Hub</h2>
+<p>Smart Tool Hub provides free text tools to help students and users.</p>
+<p>Use our tools for summarizing, translating and improving text.</p>
+</div>
+
+</div>
 
 <footer>
-<p>© 2026 Smart Tool Hub</p>
-<p>Free Online Tools | Hindi & English</p>
+<p>© 2026 Smart Tool Hub | All Rights Reserved</p>
 </footer>
 
 <script>
 function getText(){
-return document.getElementById("input").value.trim();
+ return document.getElementById("inputText").value.trim();
 }
-function show(text){
-document.getElementById("result").textContent=text;
+
+function showResult(text){
+ document.getElementById("result").textContent=text;
 }
-function message(text){
-document.getElementById("status").textContent=text;
+
+function setStatus(text){
+ document.getElementById("status").textContent=text;
 }
 
 function summarize(){
-let text=getText();
-if(!text){message("Please enter some text.");return;}
-let sentences=text.match(/[^.!?।]+[.!?।]?/g)||[text];
-let words=text.split(/\s+/).length;
-let count=Math.max(1,Math.ceil(sentences.length/2));
-let result=sentences.slice(0,count).join(" ").trim();
-show(result);
-message("Summary prepared. Original words: "+words);
+ let text=getText();
+ if(!text){
+  alert("Please enter some text first!");
+  return;
+ }
+
+ let sentences=text.match(/[^.!?।]+[.!?।]?/g)||[text];
+ sentences=sentences.map(s=>s.trim()).filter(Boolean);
+
+ if(sentences.length<=2){
+  showResult(text);
+  setStatus("Summary completed!");
+  return;
+ }
+
+ let words=text.toLowerCase().match(/[\p{L}]+/gu)||[];
+ let stop=["the","is","a","an","and","of","to","in","for","है","का","की","के","और","में","से"];
+ let freq={};
+
+ words.forEach(w=>{
+  if(!stop.includes(w)){
+   freq[w]=(freq[w]||0)+1;
+  }
+ });
+
+ let ranked=sentences.map((s,i)=>{
+  let ws=s.toLowerCase().match(/[\p{L}]+/gu)||[];
+  let score=ws.reduce((n,w)=>n+(freq[w]||0),0);
+  return {s,i,score};
+ });
+
+ let count=Math.max(1,Math.ceil(sentences.length/3));
+ let summary=ranked.sort((a,b)=>b.score-a.score)
+  .slice(0,count).sort((a,b)=>a.i-b.i)
+  .map(x=>x.s).join(" ");
+
+ showResult(summary);
+ setStatus("Summary completed!");
+}
+
+function translateText(){
+ let text=getText();
+ if(!text){
+  alert("Please enter some text first!");
+  return;
+ }
+ let lang=document.getElementById("language").value;
+ let target=lang==="hi"?"en":"hi";
+ let url="https://translate.google.com/?sl=auto&tl="+target+"&text="+encodeURIComponent(text)+"&op=translate";
+ window.open(url,"_blank");
+ setStatus("Google Translate opened in a new tab.");
 }
 
 function improve(){
-let text=getText();
-if(!text){message("Please enter some text.");return;}
-let result=text.replace(/\s+/g," ").trim();
-result=result.replace(/(^\s*\p{L}|[.!?।]\s*\p{L})/gu,
-m=>m.toUpperCase());
-if(result && !/[.!?।]$/.test(result))result+=".";
-show(result);
-message("Basic text corrections completed.");
+ let text=getText();
+ if(!text){
+  alert("Please enter some text first!");
+  return;
+ }
+
+ let improved=text
+ .replace(/[ \t]+/g," ")
+ .replace(/\s+([,.!?।])/g,"$1")
+ .replace(/([,.!?।])(?=\S)/g,"$1 ")
+ .trim();
+
+ if(improved && !/[.!?।]$/.test(improved)){
+  improved+=".";
+ }
+
+ improved=improved.charAt(0).toUpperCase()+improved.slice(1);
+
+ showResult(improved);
+ setStatus("Basic text formatting completed!");
 }
 
-async function translateText(){
-let text=getText();
-let from=document.getElementById("from").value;
-let to=document.getElementById("to").value;
-if(!text){message("Please enter text first.");return;}
-if(from===to){message("Please select two different languages.");return;}
-message("Translating... Please wait.");
-try{
-let url="https://api.mymemory.translated.net/get?q="
-+encodeURIComponent(text)
-+"&langpair="+from+"|"+to;
-let response=await fetch(url);
-if(!response.ok)throw new Error("Network error");
-let data=await response.json();
-if(data.responseStatus!==200)throw new Error("Translation unavailable");
-show(data.responseData.translatedText);
-message("Translation completed.");
-}catch(error){
-message("Translation failed. Please check internet or try again later.");
+function clearText(){
+ document.getElementById("inputText").value="";
+ setStatus("Input cleared!");
 }
+
+function clearResult(){
+ showResult("Your result will appear here...");
+ setStatus("Result cleared!");
 }
 
 function copyResult(){
-let text=document.getElementById("result").textContent;
-if(!text || text==="Your result will appear here..."){
-message("Nothing to copy.");return;
-}
-if(navigator.clipboard && window.isSecureContext){
-navigator.clipboard.writeText(text)
-.then(()=>message("Copied successfully!"))
-.catch(()=>message("Copy unavailable."));
-}else{
-let area=document.createElement("textarea");
-area.value=text;
-document.body.appendChild(area);
-area.select();
-try{
-document.execCommand("copy");
-message("Copied successfully!");
-}catch(e){message("Please copy manually.");}
-area.remove();
-}
+ let text=document.getElementById("result").textContent;
+ if(!text||text==="Your result will appear here..."){
+  alert("No result to copy!");
+  return;
+ }
+
+ if(navigator.clipboard && window.isSecureContext){
+  navigator.clipboard.writeText(text)
+   .then(()=>setStatus("Copied successfully!"))
+   .catch(()=>fallbackCopy(text));
+ }else{
+  fallbackCopy(text);
+ }
 }
 
-function clearAll(){
-document.getElementById("input").value="";
-show("Your result will appear here...");
-message("All text cleared.");
+function fallbackCopy(text){
+ let area=document.createElement("textarea");
+ area.value=text;
+ document.body.appendChild(area);
+ area.select();
+ try{
+  document.execCommand("copy");
+  setStatus("Copied successfully!");
+ }catch(e){
+  setStatus("Please select and copy manually.");
+ }
+ area.remove();
 }
 </script>
+
 </body>
 </html>
