@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -393,7 +392,71 @@ function swapLanguages(){
 
 }
 
-// IMPROVE WRITING - GRAMMAR AND SPELLING
+// EXTRA ENGLISH GRAMMAR CORRECTIONS
+
+function fixCommonGrammar(text){
+
+ const rules=[
+
+  // Singular subjects
+  [/\bEducation\s+are\b/gi,"Education is"],
+  [/\bInformation\s+are\b/gi,"Information is"],
+  [/\bKnowledge\s+are\b/gi,"Knowledge is"],
+  [/\bFurniture\s+are\b/gi,"Furniture is"],
+  [/\bAdvice\s+are\b/gi,"Advice is"],
+  [/\bEquipment\s+are\b/gi,"Equipment is"],
+  [/\bTechnology\s+are\b/gi,"Technology is"],
+  [/\bSuccess\s+are\b/gi,"Success is"],
+
+  // Subject and verb agreement
+  [/\bHe\s+have\b/gi,"He has"],
+  [/\bShe\s+have\b/gi,"She has"],
+  [/\bIt\s+have\b/gi,"It has"],
+  [/\bHe\s+do\b/gi,"He does"],
+  [/\bShe\s+do\b/gi,"She does"],
+  [/\bIt\s+do\b/gi,"It does"],
+  [/\bHe\s+go\b/gi,"He goes"],
+  [/\bShe\s+go\b/gi,"She goes"],
+  [/\bIt\s+go\b/gi,"It goes"],
+
+  // Common student writing errors
+  [/\bEvery\s+students\b/gi,"Every student"],
+  [/\bEvery\s+person\s+have\b/gi,"Every person has"],
+  [/\bSuccess\s+do\s+not\b/gi,"Success does not"],
+  [/\bWe\s+can\s+achieved\b/gi,"We can achieve"],
+  [/\bThey\s+does\b/gi,"They do"],
+  [/\bWe\s+does\b/gi,"We do"],
+  [/\bYou\s+does\b/gi,"You do"],
+  [/\bStudents\s+is\b/gi,"Students are"],
+  [/\bStudent\s+are\b/gi,"Students are"],
+  [/\bWe\s+is\b/gi,"We are"],
+  [/\bThey\s+is\b/gi,"They are"],
+  [/\bYou\s+is\b/gi,"You are"],
+  [/\bI\s+is\b/gi,"I am"],
+  [/\bAlways\s+believes\s+in\s+ourselves\b/gi,
+   "Always believe in ourselves"]
+
+ ];
+
+ rules.forEach(([pattern,replacement])=>{
+
+  text=text.replace(pattern,(match)=>{
+
+   if(match[0]===match[0].toUpperCase()){
+    return replacement.charAt(0).toUpperCase()+
+           replacement.slice(1);
+   }
+
+   return replacement.toLowerCase();
+
+  });
+
+ });
+
+ return text;
+}
+
+// IMPROVE WRITING - ADVANCED GRAMMAR CHECK
 
 async function improve(){
 
@@ -443,6 +506,7 @@ async function improve(){
 
   let corrected=text;
 
+  // Apply LanguageTool suggestions from end to beginning
   let matches=(data.matches||[]).slice().sort(
    (a,b)=>b.offset-a.offset
   );
@@ -465,13 +529,16 @@ async function improve(){
 
   });
 
+  // Apply additional common grammar corrections
+  corrected=fixCommonGrammar(corrected);
+
   if(corrected===text){
 
    showResult(
     "Your writing looks good! No corrections were suggested."
    );
 
-   setStatus("Grammar check completed!");
+   setStatus("Grammar and spelling check completed!");
 
   }else{
 
