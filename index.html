@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -117,6 +118,7 @@ footer{
 
 <label>From Language</label>
 <div class="language-row">
+
 <select id="sourceLanguage">
 <option value="hi">Hindi</option>
 <option value="en">English</option>
@@ -152,6 +154,7 @@ footer{
 <option value="es">Spanish</option>
 <option value="de">German</option>
 </select>
+
 </div>
 
 <div class="buttons">
@@ -159,17 +162,19 @@ footer{
 </div>
 
 <label>Enter Your Text</label>
+
 <textarea id="inputText"
 placeholder="Enter or paste your text here..."></textarea>
 
 <div class="buttons">
 <button onclick="summarize()">Summarize</button>
 <button id="translateButton" onclick="translateText()">Translate</button>
-<button onclick="improve()">Improve Writing</button>
+<button id="improveButton" onclick="improve()">Improve Writing</button>
 <button class="secondary" onclick="clearText()">Clear</button>
 </div>
 
 <label>Your Result</label>
+
 <div id="result">Your result will appear here...</div>
 
 <div class="buttons">
@@ -178,6 +183,7 @@ placeholder="Enter or paste your text here..."></textarea>
 </div>
 
 <p class="status" id="status">Ready to use!</p>
+
 </div>
 
 <div class="card">
@@ -207,7 +213,9 @@ function setStatus(text){
 }
 
 // SUMMARY TOOL
+
 function summarize(){
+
  let text=getText();
 
  if(!text){
@@ -216,6 +224,7 @@ function summarize(){
  }
 
  let sentences=text.match(/[^.!?।]+[.!?।]?/g)||[text];
+
  sentences=sentences.map(s=>s.trim()).filter(Boolean);
 
  if(sentences.length<=2){
@@ -225,6 +234,7 @@ function summarize(){
  }
 
  let words=text.toLowerCase().match(/[\p{L}]+/gu)||[];
+
  let stop=[
  "the","is","a","an","and","of","to","in","for",
  "है","का","की","के","और","में","से"
@@ -247,20 +257,26 @@ function summarize(){
  let count=Math.max(1,Math.ceil(sentences.length/3));
 
  let summary=ranked.sort((a,b)=>b.score-a.score)
- .slice(0,count).sort((a,b)=>a.i-b.i)
- .map(x=>x.s).join(" ");
+ .slice(0,count)
+ .sort((a,b)=>a.i-b.i)
+ .map(x=>x.s)
+ .join(" ");
 
  showResult(summary);
  setStatus("Summary completed!");
+
 }
 
-// SPLIT LONG TEXT INTO API-SAFE CHUNKS
+// SPLIT LONG TEXT
+
 function splitText(text){
+
  let chunks=[];
  let current="";
  let bytes=0;
 
  for(const char of text){
+
   let size=new TextEncoder().encode(char).length;
 
   if(bytes+size>450){
@@ -271,6 +287,7 @@ function splitText(text){
 
   current+=char;
   bytes+=size;
+
  }
 
  if(current) chunks.push(current);
@@ -279,6 +296,7 @@ function splitText(text){
 }
 
 // TRANSLATE TOOL
+
 async function translateText(){
 
  let text=getText();
@@ -300,6 +318,7 @@ async function translateText(){
 
  btn.disabled=true;
  btn.textContent="Translating...";
+
  setStatus("Please wait, translation is in progress...");
 
  try{
@@ -325,6 +344,7 @@ async function translateText(){
    if(data.responseStatus!==200 ||
       !data.responseData ||
       !data.responseData.translatedText){
+
     throw new Error(
      data.responseDetails || "This language pair is unavailable."
     );
@@ -333,6 +353,7 @@ async function translateText(){
    translated.push(data.responseData.translatedText);
 
    setStatus("Translating... "+(i+1)+"/"+chunks.length);
+
   }
 
   showResult(translated.join(""));
@@ -340,8 +361,11 @@ async function translateText(){
 
  }catch(error){
 
-  showResult("Translation could not be completed.\n\n"+error.message+
-  "\n\nPlease try again or select another language pair.");
+  showResult(
+   "Translation could not be completed.\n\n"+
+   error.message+
+   "\n\nPlease try again or select another language pair."
+  );
 
   setStatus("Translation failed. Please try again.");
 
@@ -351,9 +375,11 @@ async function translateText(){
   btn.textContent="Translate";
 
  }
+
 }
 
 // SWAP LANGUAGES
+
 function swapLanguages(){
 
  let source=document.getElementById("sourceLanguage");
@@ -364,10 +390,12 @@ function swapLanguages(){
  target.value=temp;
 
  setStatus("Languages swapped!");
+
 }
 
-// IMPROVE WRITING
-function improve(){
+// IMPROVE WRITING - GRAMMAR AND SPELLING
+
+async function improve(){
 
  let text=getText();
 
@@ -376,35 +404,126 @@ function improve(){
   return;
  }
 
- let improved=text
- .replace(/[ \t]+/g," ")
- .replace(/\s+([,.!?।])/g,"$1")
- .replace(/([,.!?।])(?=\S)/g,"$1 ")
- .trim();
-
- if(improved && !/[.!?।]$/.test(improved)){
-  improved+=".";
+ if(text.length>20000){
+  alert("Please enter text shorter than 20,000 characters.");
+  return;
  }
 
- improved=improved.charAt(0).toUpperCase()+improved.slice(1);
+ let btn=document.getElementById("improveButton");
 
- showResult(improved);
- setStatus("Basic text formatting completed!");
+ btn.disabled=true;
+ btn.textContent="Improving...";
+
+ setStatus("Checking grammar and spelling...");
+
+ try{
+
+  let formData=new URLSearchParams();
+
+  formData.append("text",text);
+  formData.append("language","auto");
+  formData.append("preferredVariants","en-US,en-GB");
+
+  let response=await fetch(
+   "https://api.languagetool.org/v2/check",
+   {
+    method:"POST",
+    headers:{
+     "Content-Type":"application/x-www-form-urlencoded"
+    },
+    body:formData.toString()
+   }
+  );
+
+  if(!response.ok){
+   throw new Error("Grammar service is temporarily unavailable.");
+  }
+
+  let data=await response.json();
+
+  let corrected=text;
+
+  let matches=(data.matches||[]).slice().sort(
+   (a,b)=>b.offset-a.offset
+  );
+
+  matches.forEach(match=>{
+
+   if(match.replacements && match.replacements.length){
+
+    let replacement=match.replacements[0].value;
+
+    let start=match.offset;
+    let end=start+match.length;
+
+    corrected=
+     corrected.slice(0,start)+
+     replacement+
+     corrected.slice(end);
+
+   }
+
+  });
+
+  if(corrected===text){
+
+   showResult(
+    "Your writing looks good! No corrections were suggested."
+   );
+
+   setStatus("Grammar check completed!");
+
+  }else{
+
+   showResult(corrected);
+
+   setStatus(
+    "Grammar and spelling corrections completed!"
+   );
+
+  }
+
+ }catch(error){
+
+  showResult(
+   "Unable to improve writing right now.\n\n"+
+   error.message+
+   "\n\nPlease try again later."
+  );
+
+  setStatus("Improve Writing could not connect.");
+
+ }finally{
+
+  btn.disabled=false;
+  btn.textContent="Improve Writing";
+
+ }
+
 }
 
 // CLEAR INPUT
+
 function clearText(){
+
  document.getElementById("inputText").value="";
+
  setStatus("Input cleared!");
+
 }
 
 // CLEAR RESULT
+
 function clearResult(){
+
  showResult("Your result will appear here...");
+
  setStatus("Result cleared!");
+
 }
 
 // COPY RESULT
+
 function copyResult(){
 
  let text=document.getElementById("result").textContent;
@@ -421,26 +540,37 @@ function copyResult(){
   .catch(()=>fallbackCopy(text));
 
  }else{
+
   fallbackCopy(text);
+
  }
+
 }
 
 function fallbackCopy(text){
 
  let area=document.createElement("textarea");
+
  area.value=text;
 
  document.body.appendChild(area);
+
  area.select();
 
  try{
+
   document.execCommand("copy");
+
   setStatus("Copied successfully!");
+
  }catch(e){
+
   setStatus("Please select and copy manually.");
+
  }
 
  area.remove();
+
 }
 
 </script>
