@@ -49,6 +49,11 @@ select,textarea{
  background:white;
 }
 textarea{min-height:155px;resize:vertical}
+.language-row{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:10px;
+}
 .buttons{
  display:grid;
  grid-template-columns:repeat(2,1fr);
@@ -66,6 +71,10 @@ button{
  cursor:pointer;
 }
 button:hover{background:#0649a8}
+button:disabled{
+ opacity:.6;
+ cursor:not-allowed;
+}
 .secondary{background:#475569}
 #result{
  background:#f8fafc;
@@ -106,18 +115,56 @@ footer{
 <div class="card">
 <h2>Smart Text Tools</h2>
 
-<label>Select Language</label>
-<select id="language">
+<label>From Language</label>
+<div class="language-row">
+<select id="sourceLanguage">
+<option value="hi">Hindi</option>
 <option value="en">English</option>
-<option value="hi">हिंदी</option>
+<option value="bn">Bengali</option>
+<option value="or">Odia</option>
+<option value="ur">Urdu</option>
+<option value="sat">Santali</option>
+<option value="ne">Nepali</option>
+<option value="pa">Punjabi</option>
+<option value="mr">Marathi</option>
+<option value="gu">Gujarati</option>
+<option value="ta">Tamil</option>
+<option value="te">Telugu</option>
+<option value="fr">French</option>
+<option value="es">Spanish</option>
+<option value="de">German</option>
 </select>
 
+<select id="targetLanguage">
+<option value="en">English</option>
+<option value="hi">Hindi</option>
+<option value="bn">Bengali</option>
+<option value="or">Odia</option>
+<option value="ur">Urdu</option>
+<option value="sat">Santali</option>
+<option value="ne">Nepali</option>
+<option value="pa">Punjabi</option>
+<option value="mr">Marathi</option>
+<option value="gu">Gujarati</option>
+<option value="ta">Tamil</option>
+<option value="te">Telugu</option>
+<option value="fr">French</option>
+<option value="es">Spanish</option>
+<option value="de">German</option>
+</select>
+</div>
+
+<div class="buttons">
+<button onclick="swapLanguages()">⇄ Swap Languages</button>
+</div>
+
 <label>Enter Your Text</label>
-<textarea id="inputText" placeholder="Enter or paste your text here..."></textarea>
+<textarea id="inputText"
+placeholder="Enter or paste your text here..."></textarea>
 
 <div class="buttons">
 <button onclick="summarize()">Summarize</button>
-<button onclick="translateText()">Translate</button>
+<button id="translateButton" onclick="translateText()">Translate</button>
 <button onclick="improve()">Improve Writing</button>
 <button class="secondary" onclick="clearText()">Clear</button>
 </div>
@@ -146,6 +193,7 @@ footer{
 </footer>
 
 <script>
+
 function getText(){
  return document.getElementById("inputText").value.trim();
 }
@@ -158,8 +206,10 @@ function setStatus(text){
  document.getElementById("status").textContent=text;
 }
 
+// SUMMARY TOOL
 function summarize(){
  let text=getText();
+
  if(!text){
   alert("Please enter some text first!");
   return;
@@ -175,7 +225,11 @@ function summarize(){
  }
 
  let words=text.toLowerCase().match(/[\p{L}]+/gu)||[];
- let stop=["the","is","a","an","and","of","to","in","for","है","का","की","के","और","में","से"];
+ let stop=[
+ "the","is","a","an","and","of","to","in","for",
+ "है","का","की","के","और","में","से"
+ ];
+
  let freq={};
 
  words.forEach(w=>{
@@ -191,29 +245,132 @@ function summarize(){
  });
 
  let count=Math.max(1,Math.ceil(sentences.length/3));
+
  let summary=ranked.sort((a,b)=>b.score-a.score)
-  .slice(0,count).sort((a,b)=>a.i-b.i)
-  .map(x=>x.s).join(" ");
+ .slice(0,count).sort((a,b)=>a.i-b.i)
+ .map(x=>x.s).join(" ");
 
  showResult(summary);
  setStatus("Summary completed!");
 }
 
-function translateText(){
+// SPLIT LONG TEXT INTO API-SAFE CHUNKS
+function splitText(text){
+ let chunks=[];
+ let current="";
+ let bytes=0;
+
+ for(const char of text){
+  let size=new TextEncoder().encode(char).length;
+
+  if(bytes+size>450){
+   chunks.push(current);
+   current="";
+   bytes=0;
+  }
+
+  current+=char;
+  bytes+=size;
+ }
+
+ if(current) chunks.push(current);
+
+ return chunks;
+}
+
+// TRANSLATE TOOL
+async function translateText(){
+
  let text=getText();
+
  if(!text){
   alert("Please enter some text first!");
   return;
  }
- let lang=document.getElementById("language").value;
- let target=lang==="hi"?"en":"hi";
- let url="https://translate.google.com/?sl=auto&tl="+target+"&text="+encodeURIComponent(text)+"&op=translate";
- window.open(url,"_blank");
- setStatus("Google Translate opened in a new tab.");
+
+ let source=document.getElementById("sourceLanguage").value;
+ let target=document.getElementById("targetLanguage").value;
+
+ if(source===target){
+  alert("Please select two different languages!");
+  return;
+ }
+
+ let btn=document.getElementById("translateButton");
+
+ btn.disabled=true;
+ btn.textContent="Translating...";
+ setStatus("Please wait, translation is in progress...");
+
+ try{
+
+  let chunks=splitText(text);
+  let translated=[];
+
+  for(let i=0;i<chunks.length;i++){
+
+   let url=new URL("https://api.mymemory.translated.net/get");
+
+   url.searchParams.set("q",chunks[i]);
+   url.searchParams.set("langpair",source+"|"+target);
+
+   let response=await fetch(url.toString());
+
+   if(!response.ok){
+    throw new Error("Translation server error.");
+   }
+
+   let data=await response.json();
+
+   if(data.responseStatus!==200 ||
+      !data.responseData ||
+      !data.responseData.translatedText){
+    throw new Error(
+     data.responseDetails || "This language pair is unavailable."
+    );
+   }
+
+   translated.push(data.responseData.translatedText);
+
+   setStatus("Translating... "+(i+1)+"/"+chunks.length);
+  }
+
+  showResult(translated.join(""));
+  setStatus("Translation completed successfully!");
+
+ }catch(error){
+
+  showResult("Translation could not be completed.\n\n"+error.message+
+  "\n\nPlease try again or select another language pair.");
+
+  setStatus("Translation failed. Please try again.");
+
+ }finally{
+
+  btn.disabled=false;
+  btn.textContent="Translate";
+
+ }
 }
 
+// SWAP LANGUAGES
+function swapLanguages(){
+
+ let source=document.getElementById("sourceLanguage");
+ let target=document.getElementById("targetLanguage");
+
+ let temp=source.value;
+ source.value=target.value;
+ target.value=temp;
+
+ setStatus("Languages swapped!");
+}
+
+// IMPROVE WRITING
 function improve(){
+
  let text=getText();
+
  if(!text){
   alert("Please enter some text first!");
   return;
@@ -235,45 +392,57 @@ function improve(){
  setStatus("Basic text formatting completed!");
 }
 
+// CLEAR INPUT
 function clearText(){
  document.getElementById("inputText").value="";
  setStatus("Input cleared!");
 }
 
+// CLEAR RESULT
 function clearResult(){
  showResult("Your result will appear here...");
  setStatus("Result cleared!");
 }
 
+// COPY RESULT
 function copyResult(){
+
  let text=document.getElementById("result").textContent;
- if(!text||text==="Your result will appear here..."){
+
+ if(!text || text==="Your result will appear here..."){
   alert("No result to copy!");
   return;
  }
 
  if(navigator.clipboard && window.isSecureContext){
+
   navigator.clipboard.writeText(text)
-   .then(()=>setStatus("Copied successfully!"))
-   .catch(()=>fallbackCopy(text));
+  .then(()=>setStatus("Copied successfully!"))
+  .catch(()=>fallbackCopy(text));
+
  }else{
   fallbackCopy(text);
  }
 }
 
 function fallbackCopy(text){
+
  let area=document.createElement("textarea");
  area.value=text;
+
  document.body.appendChild(area);
  area.select();
+
  try{
   document.execCommand("copy");
   setStatus("Copied successfully!");
  }catch(e){
   setStatus("Please select and copy manually.");
  }
+
  area.remove();
 }
+
 </script>
 
 </body>
